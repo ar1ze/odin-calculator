@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #2c3e50;
+  font-family: 'Roboto', serif;
+  font-size: 24px;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10%;
+}
+
+.calculator {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: #1A1C1E;
+  border-radius: 1rem;
+  padding: 4rem;
+}
+
+.calculator-display {
+  padding: 2rem 0;
+  border-bottom: 0.3rem solid #ECECEA;
+  text-align: right;
+  font-weight: bold;
+}
+
+.history-display {
+  font-size: 2rem;
+  color: #8f9185;
+}
+
+.answer-display {
+  font-size: 4rem;
+  color: #ECECEA;
+}
+
+.calculator-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 4rem 0 0rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.btn {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.4rem;
+  font-size: 1.255555rem;
+  font-weight: bold;
+  color: #fff;
+  border: none;
+  cursor: pointer; 
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover effects */
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Active/pressed effects */
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.1s ease-in-out;
+}
+
+/* Focus effects for accessibility */
+.btn:focus {
+  outline: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+/* Number, decimal, and delete buttons */
+.btn-number,
+.btn-decimal,
+.btn-delete {
+  background: #523D27;
+}
+
+.btn-number:hover,
+.btn-decimal:hover,
+.btn-delete:hover {
+  background: #6B4F35;
+}
+
+.btn-number:active,
+.btn-decimal:active,
+.btn-delete:active {
+  background: #3F2F1F;
+}
+
+/* Operator buttons */
+.btn-operator {
+  background: #F0AE61;
+}
+
+.btn-operator:hover {
+  background: #F2B875;
+}
+
+.btn-operator:active {
+  background: #E89B4A;
+}
+
+/* Memory and modulo buttons */
+.btn-memory, 
+.btn-modulo {
+  background: #847B69;
+}
+
+.btn-memory:hover, 
+.btn-modulo:hover {
+  background: #968B78;
+}
+
+.btn-memory:active, 
+.btn-modulo:active {
+  background: #726A58;
+}
+
+/* Clear and equals buttons with gradient */
+.btn-clear, 
+.btn-equals {
+  background: linear-gradient(180deg, #FFA600, #FFEA4D);
+}
+
+.btn-clear:hover, 
+.btn-equals:hover {
+  background: linear-gradient(180deg, #FFB520, #FFF065);
+}
+
+.btn-clear:active, 
+.btn-equals:active {
+  background: linear-gradient(180deg, #E89500, #E6D03A);
+}
+
+/* Special effect for equals button */
+.btn-equals:hover {
+  box-shadow: 0 6px 12px rgba(255, 166, 0, 0.4);
+}
