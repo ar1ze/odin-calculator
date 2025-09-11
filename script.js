@@ -29,9 +29,9 @@ function handleOperatorClick(e) {
 }
 
 function handleClearClick() {
-  console.log(`The button clear 'C' was clicked!`);
   clearAnswerArray();
   updateAnswerDisplay();
+  console.log(`The button clear 'C' was clicked!`);
 }
 
 function handleEqualsClick() {
@@ -39,6 +39,8 @@ function handleEqualsClick() {
 }
 
 function handleDeleteClick() {
+  deleteLastInArray();
+  updateAnswerDisplay();
   console.log(`The button 'DEL' was clicked!`);
 }
 
@@ -54,18 +56,35 @@ function pushToAnswerArray(char) {
   }
 
   let lastIndex = answerArray.length - 1;
-  let lastChar = answerArray[lastIndex];
+  let lastString = answerArray[lastIndex];
 
   // If the new character or the last character is an operator, add a new element.
-  if (
-    OPERATORS.includes(char) ||
-    OPERATORS.includes(lastChar) ||
-    answerArray.length === 0
-  ) {
+  let isOperator = OPERATORS.includes(char);
+  let isOperatorLast = OPERATORS.includes(lastString);
+  let emptyArray = answerArray.length === 0;
+
+  if ( isOperator || isOperatorLast || emptyArray) {
     answerArray.push(char);
   } else {
     // Otherwise, append the new character to the last element to form a multi-digit number.
     answerArray[lastIndex] += char;
+  }
+}
+
+// Delete the last element array
+function deleteLastInArray() {
+  let lastIndex = answerArray.length - 1;
+  let lastString = answerArray[lastIndex];
+  let stringArray = lastString.split('');
+
+  // Remove the last elemenf if oeprator else remove the last digit
+  let isOperatorLast = OPERATORS.includes(lastString);
+  let isSingleDigit = stringArray.length === 1;
+  if (isOperatorLast || isSingleDigit) {
+    answerArray.pop();
+  } else {
+    stringArray.pop();
+    answerArray[lastIndex] = stringArray.join('');
   }
 }
 
@@ -75,7 +94,6 @@ function clearAnswerArray() {
 }
 
 function updateAnswerDisplay() {
-  console.log(answerArray);
   answerDisplay.textContent = answerToString(answerArray);
 }
 
