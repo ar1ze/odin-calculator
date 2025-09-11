@@ -1,53 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Project: Calculator</title>
   </head>
-
   <body>
-    <div class="calculator" id="calculator-app">
-      <div class="calculator-display" id="calculator-display">
-        <div class="history-display" id="calculation-history">45 x 24</div>
-        <div class="answer-display" id="current-answer">1080</div>
+    <div class="calculator">
+      <div class="calculator-display">
+        <div class="history-display">45 x 24</div>
+        <div class="answer-display">1080</div>
       </div>
-      <div class="calculator-buttons" id="button-grid">
+      <div class="calculator-buttons">
         <div class="button-row">
-          <button class="btn btn-clear" id="clear-button">C</button>
-          <button class="btn btn-memory" id="memory-button">M</button>
-          <button class="btn btn-modulo" id="modulo-button">%</button>
-          <button class="btn btn-operator" id="divide-button">/</button>
+          <button class="btn btn-clear">C</button>
+          <button class="btn btn-memory">M</button>
+          <button class="btn btn-operator btn-modulo">%</button>
+          <button class="btn btn-operator">/</button>
         </div>
         <div class="button-row">
-          <button class="btn btn-number" id="number-7">7</button>
-          <button class="btn btn-number" id="number-8">8</button>
-          <button class="btn btn-number" id="number-9">9</button>
-          <button class="btn btn-operator" id="multiply-button">x</button>
+          <button class="btn btn-number">7</button>
+          <button class="btn btn-number">8</button>
+          <button class="btn btn-number">9</button>
+          <button class="btn btn-operator">x</button>
         </div>
         <div class="button-row">
-          <button class="btn btn-number" id="number-4">4</button>
-          <button class="btn btn-number" id="number-5">5</button>
-          <button class="btn btn-number" id="number-6">6</button>
-          <button class="btn btn-operator" id="subtract-button">-</button>
+          <button class="btn btn-number">4</button>
+          <button class="btn btn-number">5</button>
+          <button class="btn btn-number">6</button>
+          <button class="btn btn-operator">-</button>
         </div>
         <div class="button-row">
-          <button class="btn btn-number" id="number-1">1</button>
-          <button class="btn btn-number" id="number-2">2</button>
-          <button class="btn btn-number" id="number-3">3</button>
-          <button class="btn btn-operator" id="add-button">+</button>
+          <button class="btn btn-number">1</button>
+          <button class="btn btn-number">2</button>
+          <button class="btn btn-number">3</button>
+          <button class="btn btn-operator">+</button>
         </div>
         <div class="button-row">
-          <button class="btn btn-decimal" id="decimal-button">.</button>
-          <button class="btn btn-number" id="number-0">0</button>
-          <button class="btn btn-delete" id="delete-button">DEL</button>
-          <button class="btn btn-equals" id="equals-button">=</button>
+          <button class="btn btn-decimal">.</button>
+          <button class="btn btn-number">0</button>
+          <button class="btn btn-delete">DEL</button>
+          <button class="btn btn-equals">=</button>
         </div>
       </div>
     </div>
     <script src="script.js"></script>
   </body>
-
 </html>

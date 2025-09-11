@@ -104,7 +104,6 @@ body {
   background: #3F2F1F;
 }
 
-/* Operator buttons */
 .btn-operator {
   background: #F0AE61;
 }
@@ -117,7 +116,6 @@ body {
   background: #E89B4A;
 }
 
-/* Memory and modulo buttons */
 .btn-memory, 
 .btn-modulo {
   background: #847B69;
@@ -133,7 +131,6 @@ body {
   background: #726A58;
 }
 
-/* Clear and equals buttons with gradient */
 .btn-clear, 
 .btn-equals {
   background: linear-gradient(180deg, #FFA600, #FFEA4D);
