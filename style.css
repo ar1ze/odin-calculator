@@ -49,14 +49,14 @@ body {
 
 .button-row {
   display: flex;
-  gap: 2rem;
+  gap: 1.8rem;
   justify-content: space-between;
 }
 
 .btn {
   flex: 1;
   min-width: 0;
-  padding: 2rem;
+  padding: 1.8rem 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -70,26 +70,22 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Hover effects */
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Active/pressed effects */
 .btn:active {
   transform: translateY(1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.1s ease-in-out;
 }
 
-/* Focus effects for accessibility */
 .btn:focus {
   outline: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
-/* Number, decimal, and delete buttons */
 .btn-number,
 .btn-decimal,
 .btn-delete {
@@ -153,7 +149,6 @@ body {
   background: linear-gradient(180deg, #E89500, #E6D03A);
 }
 
-/* Special effect for equals button */
 .btn-equals:hover {
   box-shadow: 0 6px 12px rgba(255, 166, 0, 0.4);
 }
