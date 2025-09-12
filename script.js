@@ -1,10 +1,10 @@
-// A string of all valid calculator operators.
-const OPERATORS = '+-*/%';
+// Calculator operators for validation
+const OPERATORS = ['+', '-', 'x', '/', '%'];
 
-// An array to store the sequence of numbers and operators for the calculation.
-let answerArray = [0];
+// Stores calculation as array of numbers and operators
+let answerArray = ['0'];
 
-// DOM element selectors.
+// DOM elements
 const numberBtns = document.querySelectorAll('.btn-number');
 const operatorBtns = document.querySelectorAll('.btn-operator');
 const equalsBtn = document.querySelector('.btn-equals');
@@ -13,7 +13,7 @@ const deleteBtn = document.querySelector('.btn-delete');
 const decimalBtn = document.querySelector('.btn-decimal');
 const answerDisplay = document.querySelector('.answer-display');
 
-// Functions
+// Event handlers
 function handleNumberClick(e) {
   const number = e.target.textContent;
   pushToAnswerArray(number);
@@ -48,56 +48,64 @@ function handleDecimalClick() {
   console.log(`The button decmial '.' was clicked!`);
 }
 
-// Pushes a character to the answerArray, handling multi-digit numbers.
+// Adds character to array, combining consecutive digits into multi-digit numbers
 function pushToAnswerArray(char) {
-  // If the array starts with zero, remove it.
-  if (!answerArray[0]) {
+  let arrayStartsWithZero = answerArray.at(0) === '0';
+  let isCharOperator = OPERATORS.includes(char);
+
+  let lastElement = answerArray.slice(-1).at(0);
+  let lastElementIsOperator = OPERATORS.includes(lastElement);
+
+  // Prevent consecutive operators
+  if (isCharOperator && lastElementIsOperator) return;
+
+  // Replace leading zero with first number
+  if (arrayStartsWithZero && !isCharOperator && !lastElementIsOperator) {
     answerArray.shift();
   }
 
-  let lastIndex = answerArray.length - 1;
-  let lastString = answerArray[lastIndex];
-
-  // If the new character or the last character is an operator, add a new element.
-  let isOperator = OPERATORS.includes(char);
-  let isOperatorLast = OPERATORS.includes(lastString);
-  let emptyArray = answerArray.length === 0;
-
-  if ( isOperator || isOperatorLast || emptyArray) {
+  let arrayIsEmpty = answerArray.length === 0;
+  if (isCharOperator || lastElementIsOperator || arrayIsEmpty) {
     answerArray.push(char);
   } else {
-    // Otherwise, append the new character to the last element to form a multi-digit number.
-    answerArray[lastIndex] += char;
+    // Combine digits to form multi-digit numbers
+    answerArray.splice(-1, 1, lastElement + char);
   }
 }
 
-// Delete the last element array
+// Removes last character or element from array
 function deleteLastInArray() {
-  let lastIndex = answerArray.length - 1;
-  let lastString = answerArray[lastIndex];
-  let stringArray = lastString.split('');
+  let lastElement = answerArray.slice(-1).at(0);
+  let lastElementArray = lastElement.split('');
 
-  // Remove the last elemenf if oeprator else remove the last digit
-  let isOperatorLast = OPERATORS.includes(lastString);
-  let isSingleDigit = stringArray.length === 1;
-  if (isOperatorLast || isSingleDigit) {
+  let isOperatorLast = OPERATORS.includes(lastElement);
+  let isAnswerSingleElement = answerArray.length === 1;
+  let isLastElementSingleChar = lastElementArray.length === 1;
+
+  // Reset to '0' if deleting the last remaining character
+  if (isAnswerSingleElement && isLastElementSingleChar) {
+    clearAnswerArray();
+    return;
+  }
+
+  if (isOperatorLast || isLastElementSingleChar) {
     answerArray.pop();
   } else {
-    stringArray.pop();
-    answerArray[lastIndex] = stringArray.join('');
+    // Remove last digit from multi-digit number
+    lastElementArray.splice(-1, 1);
+    answerArray.splice(-1, 1, lastElementArray.join(''));
   }
 }
 
-// Resets the answerArray to a single element of 0.
 function clearAnswerArray() {
-  answerArray = [0];
+  answerArray = ['0'];
 }
 
 function updateAnswerDisplay() {
   answerDisplay.textContent = answerToString(answerArray);
 }
 
-// Joins the elements of the array into a single string with spaces.
+// Converts array to display string with spaces between elements
 function answerToString(array) {
   return array.join(' ');
 }
