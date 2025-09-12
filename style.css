@@ -116,17 +116,17 @@ body {
   background: #E89B4A;
 }
 
-.btn-memory, 
+.btn-plus-minus, 
 .btn-modulo {
   background: #847B69;
 }
 
-.btn-memory:hover, 
+.btn-plus-minus:hover, 
 .btn-modulo:hover {
   background: #968B78;
 }
 
-.btn-memory:active, 
+.btn-plus-minus:active, 
 .btn-modulo:active {
   background: #726A58;
 }
