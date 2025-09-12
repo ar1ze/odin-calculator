@@ -1,125 +1,155 @@
-// Calculator operators for validation
+const DECIMAL_POINT = '.';
 const OPERATORS = ['+', '-', 'x', '/', '%'];
 
-// Stores calculation as array of numbers and operators
-let answerArray = ['0'];
+// Stores the calculation as an array of numbers and operators
+let calculationParts = ['0'];
 
 // DOM elements
-const numberBtns = document.querySelectorAll('.btn-number');
-const operatorBtns = document.querySelectorAll('.btn-operator');
-const equalsBtn = document.querySelector('.btn-equals');
-const clearBtn = document.querySelector('.btn-clear');
-const deleteBtn = document.querySelector('.btn-delete');
-const decimalBtn = document.querySelector('.btn-decimal');
-const answerDisplay = document.querySelector('.answer-display');
+const numberButtons = document.querySelectorAll('.btn-number');
+const operatorButtons = document.querySelectorAll('.btn-operator');
+const equalsButton = document.querySelector('.btn-equals');
+const clearButton = document.querySelector('.btn-clear');
+const deleteButton = document.querySelector('.btn-delete');
+const decimalButton = document.querySelector('.btn-decimal');
+const calculationDisplay = document.querySelector('.answer-display');
 
 // Event handlers
-function handleNumberClick(e) {
-  const number = e.target.textContent;
-  pushToAnswerArray(number);
-  updateAnswerDisplay();
-  console.log(`Number Button '${number}' was clicked`);
+function handleNumberClick(event) {
+  const numberValue = event.target.textContent;
+  addToCalculation(numberValue);
+  updateDisplay();
+  console.log(`Number Button '${numberValue}' was clicked`);
 }
 
-function handleOperatorClick(e) {
-  const operator = e.target.textContent;
-  pushToAnswerArray(operator);
-  updateAnswerDisplay();
-  console.log(`Operator button '${operator}' was clicked`);
+function handleOperatorClick(event) {
+  const operatorValue = event.target.textContent;
+  addToCalculation(operatorValue);
+  updateDisplay();
+  console.log(`Operator button '${operatorValue}' was clicked`);
 }
 
 function handleClearClick() {
-  clearAnswerArray();
-  updateAnswerDisplay();
+  clearCalculation();
+  updateDisplay();
   console.log(`The button clear 'C' was clicked!`);
+}
+
+function handleDeleteClick() {
+  deleteLastInput();
+  updateDisplay();
+  console.log(`The button 'DEL' was clicked!`);
+}
+
+function handleDecimalClick(event) {
+  const decimalValue = event.target.textContent;
+  addToCalculation(decimalValue);
+  updateDisplay();
+  console.log(`The button decimal '.' was clicked!`);
 }
 
 function handleEqualsClick() {
   console.log(`The button equals '=' was clicked!`);
 }
 
-function handleDeleteClick() {
-  deleteLastInArray();
-  updateAnswerDisplay();
-  console.log(`The button 'DEL' was clicked!`);
-}
+// Adds a character to the calculation array, handling complex logic
+function addToCalculation(inputValue) {
+  let isCalculationInitiallyZero = calculationParts.at(0) === '0';
 
-function handleDecimalClick() {
-  console.log(`The button decmial '.' was clicked!`);
-}
+  let isInputAnOperator = OPERATORS.includes(inputValue);
+  let isInputADecimal = inputValue === DECIMAL_POINT;
 
-// Adds character to array, combining consecutive digits into multi-digit numbers
-function pushToAnswerArray(char) {
-  let arrayStartsWithZero = answerArray.at(0) === '0';
-  let isCharOperator = OPERATORS.includes(char);
+  let lastPart = calculationParts.slice(-1).at(0);
+  let lastCharOfLastPart = lastPart.slice(-1);
+  let isLastPartAnOperator = OPERATORS.includes(lastPart);
+  let isLastCharOfLastPartADecimal = lastCharOfLastPart === DECIMAL_POINT;
+  let lastPartContainsDecimal = lastPart.includes(DECIMAL_POINT);
 
-  let lastElement = answerArray.slice(-1).at(0);
-  let lastElementIsOperator = OPERATORS.includes(lastElement);
+  let isInputOrLastPartAnOperator = isInputAnOperator || isLastPartAnOperator;
+  let areInputAndLastPartOperators = isInputAnOperator && isLastPartAnOperator;
+  let areInputAndLastCharDecimals =
+    isInputADecimal && isLastCharOfLastPartADecimal;
 
-  // Prevent consecutive operators
-  if (isCharOperator && lastElementIsOperator) return;
+  // Prevent invalid inputs like consecutive operators or decimals
+  if (areInputAndLastPartOperators) return;
+  if (areInputAndLastCharDecimals) return;
 
-  // Replace leading zero with first number
-  if (arrayStartsWithZero && !isCharOperator && !lastElementIsOperator) {
-    answerArray.shift();
+  // Handle replacing the initial '0'
+  if (isCalculationInitiallyZero && !areInputAndLastPartOperators) {
+    if (isInputADecimal && isCalculationInitiallyZero) {
+      // Convert "0" to "0."
+      calculationParts.splice(-1, 1, lastPart + inputValue);
+    } else {
+      // Remove leading zero for new numbers
+      calculationParts.shift();
+    }
   }
 
-  let arrayIsEmpty = answerArray.length === 0;
-  if (isCharOperator || lastElementIsOperator || arrayIsEmpty) {
-    answerArray.push(char);
+  let isCalculationEmpty = calculationParts.length === 0;
+  // Decide whether to start a new calculation part or append to the current one.
+  if (isInputOrLastPartAnOperator || isCalculationEmpty) {
+    if (isLastPartAnOperator && isInputADecimal) {
+      // Add "0." after an operator if a decimal is pressed
+      calculationParts.push('0' + inputValue);
+    } else {
+      calculationParts.push(inputValue);
+    }
   } else {
-    // Combine digits to form multi-digit numbers
-    answerArray.splice(-1, 1, lastElement + char);
+    // Prevent multiple decimals in one number
+    if (lastPartContainsDecimal && isInputADecimal) return;
+
+    // Append to the existing number
+    calculationParts.splice(-1, 1, lastPart + inputValue);
   }
 }
 
-// Removes last character or element from array
-function deleteLastInArray() {
-  let lastElement = answerArray.slice(-1).at(0);
-  let lastElementArray = lastElement.split('');
+// Removes the last character or element from the calculation array
+function deleteLastInput() {
+  let lastPart = calculationParts.slice(-1).at(0);
+  let lastPartAsCharArray = lastPart.split('');
 
-  let isOperatorLast = OPERATORS.includes(lastElement);
-  let isAnswerSingleElement = answerArray.length === 1;
-  let isLastElementSingleChar = lastElementArray.length === 1;
+  let isLastPartAnOperator = OPERATORS.includes(lastPart);
+  let isCalculationASinglePart = calculationParts.length === 1;
+  let isLastPartASingleChar = lastPartAsCharArray.length === 1;
 
-  // Reset to '0' if deleting the last remaining character
-  if (isAnswerSingleElement && isLastElementSingleChar) {
-    clearAnswerArray();
+  // Reset to '0' if deleting the very last character on screen
+  if (isCalculationASinglePart && isLastPartASingleChar) {
+    clearCalculation();
     return;
   }
 
-  if (isOperatorLast || isLastElementSingleChar) {
-    answerArray.pop();
+  if (isLastPartAnOperator || isLastPartASingleChar) {
+    calculationParts.pop();
   } else {
-    // Remove last digit from multi-digit number
-    lastElementArray.splice(-1, 1);
-    answerArray.splice(-1, 1, lastElementArray.join(''));
+    // Remove the last character from a multi-digit number
+    lastPartAsCharArray.pop();
+    calculationParts.splice(-1, 1, lastPartAsCharArray.join(''));
   }
 }
 
-function clearAnswerArray() {
-  answerArray = ['0'];
+function clearCalculation() {
+  calculationParts = ['0'];
 }
 
-function updateAnswerDisplay() {
-  answerDisplay.textContent = answerToString(answerArray);
+function updateDisplay() {
+  calculationDisplay.textContent =
+    formatCalculationForDisplay(calculationParts);
 }
 
-// Converts array to display string with spaces between elements
-function answerToString(array) {
-  return array.join(' ');
+// Converts the calculation array to a string for display
+function formatCalculationForDisplay(parts) {
+  return parts.join(' ');
 }
 
 // Event listeners
-numberBtns.forEach((numberBtn) => {
-  numberBtn.addEventListener('click', handleNumberClick);
+numberButtons.forEach((button) => {
+  button.addEventListener('click', handleNumberClick);
 });
 
-operatorBtns.forEach((operatorBtn) => {
-  operatorBtn.addEventListener('click', handleOperatorClick);
+operatorButtons.forEach((button) => {
+  button.addEventListener('click', handleOperatorClick);
 });
 
-clearBtn.addEventListener('click', handleClearClick);
-equalsBtn.addEventListener('click', handleEqualsClick);
-deleteBtn.addEventListener('click', handleDeleteClick);
-decimalBtn.addEventListener('click', handleDecimalClick);
+clearButton.addEventListener('click', handleClearClick);
+equalsButton.addEventListener('click', handleEqualsClick);
+deleteButton.addEventListener('click', handleDeleteClick);
+decimalButton.addEventListener('click', handleDecimalClick);
