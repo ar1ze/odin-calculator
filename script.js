@@ -8,12 +8,15 @@ let calculationSequence = ['0'];
 // DOM elements
 const numberButtons = document.querySelectorAll('.btn-number');
 const operatorButtons = document.querySelectorAll('.btn-operator');
-const equalsButton = document.querySelector('.btn-equals');
+
 const clearButton = document.querySelector('.btn-clear');
+const plusMinusToggleButton = document.querySelector('.btn-plus-minus');
+
 const deleteButton = document.querySelector('.btn-delete');
 const decimalButton = document.querySelector('.btn-decimal');
+
+const equalsButton = document.querySelector('.btn-equals');
 const calculationDisplay = document.querySelector('.answer-display');
-const plusMinusToggleButton = document.querySelector('.btn-plus-minus');
 
 // Event handlers
 function handleNumberClick(event) {
@@ -56,6 +59,7 @@ function handleDecimalClick(event) {
 }
 
 function handleEqualsClick() {
+  computeCalculationSequence();
   console.log(`The button equals '=' was clicked!`);
 }
 
@@ -190,6 +194,7 @@ function addToCalculation(inputValue) {
 function deleteLastInput() {
   let lastElement = calculationSequence.slice(-1).at(0);
   let lastElementAsArray = lastElement.split('');
+
   let isLastElementAnOperator = OPERATORS.includes(lastElement);
   let isSingleElementCalculation = calculationSequence.length === 1;
   let isLastElementSingleChar = lastElementAsArray.length === 1;
@@ -207,6 +212,35 @@ function deleteLastInput() {
     lastElementAsArray.pop();
     calculationSequence.splice(-1, 1, lastElementAsArray.join(''));
   }
+}
+
+function computeCalculationSequence() {
+  let lastElement = calculationSequence.slice(-1).at(0);
+
+  let calculationSequenceLength = calculationSequence.length;
+  let isLastElementAnOperator = OPERATORS.includes(lastElement);
+
+  // Return if single element or the last element is an operator
+  if (calculationSequenceLength || isLastElementAnOperator) return;
+}
+
+function convertCalculationSequenceToNumbers(array) {
+  return array.map((item) => {
+    // Return if item is an operator
+    let isOperator = OPERATORS.includes(item);
+    if (isOperator) return item;
+
+    // Remove parantheses if toggled
+    let itemArray = item.split('');
+    let isToggled = isPartNegated(itemArray); 
+    item = isToggled ? item.slice(1, -1) : item
+    
+    // Convert to float or int depending on whether the number is a decimal
+    let isNumberDecimal = item.includes('.');
+    item = isNumberDecimal ? parseFloat(item) : parseInt(item);
+
+    return item;
+  });
 }
 
 function clearCalculation() {
