@@ -1,8 +1,9 @@
 const DECIMAL_POINT = '.';
 const OPERATORS = ['+', '-', 'x', '/', '%'];
+const PLUS_MINUS_SYMBOLS = ['(', '-', ')'];
 
-// Stores the calculation as an array of numbers and operators
-let calculationParts = ['0'];
+// Stores the current calculation sequence of operands and operators.
+let calculationSequence = ['0'];
 
 // DOM elements
 const numberButtons = document.querySelectorAll('.btn-number');
@@ -12,6 +13,7 @@ const clearButton = document.querySelector('.btn-clear');
 const deleteButton = document.querySelector('.btn-delete');
 const decimalButton = document.querySelector('.btn-decimal');
 const calculationDisplay = document.querySelector('.answer-display');
+const plusMinusToggleButton = document.querySelector('.btn-plus-minus');
 
 // Event handlers
 function handleNumberClick(event) {
@@ -34,6 +36,12 @@ function handleClearClick() {
   console.log(`The button clear 'C' was clicked!`);
 }
 
+function handlePlusMinusToggleClick() {
+  togglePlusMinus();
+  updateDisplay();
+  console.log(`The button plus minus '+/-' was clicked!`);
+}
+
 function handleDeleteClick() {
   deleteLastInput();
   updateDisplay();
@@ -51,15 +59,59 @@ function handleEqualsClick() {
   console.log(`The button equals '=' was clicked!`);
 }
 
-// Adds a character to the calculation array, handling complex logic
+function isPartToggled(partAsArray) {
+  let plusMinusSymbolCount = partAsArray.reduce((sum, currentCharacter) => {
+    let isPlusMinusSymbol = PLUS_MINUS_SYMBOLS.includes(currentCharacter);
+    if (isPlusMinusSymbol) return ++sum;
+    else return sum;
+  }, 0);
+  return plusMinusSymbolCount === 3;
+}
+
+function convertToPositivePart(partAsArray) {
+  return partAsArray.reduce((accumulatedString, currentCharacter) => {
+    let isPlusMinusSymbol = PLUS_MINUS_SYMBOLS.includes(currentCharacter);
+    if (!isPlusMinusSymbol) return accumulatedString + currentCharacter;
+    else return accumulatedString;
+  }, '');
+}
+
+function convertToNegativePart(part) {
+  return '(-' + part + ')';
+}
+
+function togglePlusMinus() {
+  let isCalculationInitiallyZero = calculationSequence.at(0) === '0';
+  let lastPart = calculationSequence.slice(-1).at(0);
+  let isLastPartAnOperator = OPERATORS.includes(lastPart);
+
+  // Do nothing if display is "0" or the last entry is an operator.
+  if (isCalculationInitiallyZero || isLastPartAnOperator) return;
+
+  let lastPartAsArray = lastPart.split('');
+  let isCurrentlyToggled = isPartToggled(lastPartAsArray);
+  let toggledPart;
+
+  if (isCurrentlyToggled) {
+    toggledPart = convertToPositivePart(lastPartAsArray);
+  } else {
+    toggledPart = convertToNegativePart(lastPart);
+  }
+
+  calculationSequence.splice(-1, 1, toggledPart);
+}
+
+// Adds user input to the calculation sequence, handling complex logic.
 function addToCalculation(inputValue) {
-  let isCalculationInitiallyZero = calculationParts.at(0) === '0';
+  let isCalculationInitiallyZero = calculationSequence.at(0) === '0';
 
   let isInputAnOperator = OPERATORS.includes(inputValue);
   let isInputADecimal = inputValue === DECIMAL_POINT;
 
-  let lastPart = calculationParts.slice(-1).at(0);
+  let lastPart = calculationSequence.slice(-1).at(0);
+  let lastPartAsArray = lastPart.split('');
   let lastCharOfLastPart = lastPart.slice(-1);
+
   let isLastPartAnOperator = OPERATORS.includes(lastPart);
   let isLastCharOfLastPartADecimal = lastCharOfLastPart === DECIMAL_POINT;
   let lastPartContainsDecimal = lastPart.includes(DECIMAL_POINT);
@@ -69,75 +121,88 @@ function addToCalculation(inputValue) {
   let areInputAndLastCharDecimals =
     isInputADecimal && isLastCharOfLastPartADecimal;
 
-  // Prevent invalid inputs like consecutive operators or decimals
+  // Prevent invalid inputs like consecutive operators or decimals.
   if (areInputAndLastPartOperators) return;
   if (areInputAndLastCharDecimals) return;
 
-  // Handle replacing the initial '0'
+  // Handle replacing the initial '0'.
   if (isCalculationInitiallyZero && !areInputAndLastPartOperators) {
     if (isInputADecimal && isCalculationInitiallyZero) {
       // Convert "0" to "0."
-      calculationParts.splice(-1, 1, lastPart + inputValue);
+      calculationSequence.splice(-1, 1, lastPart + inputValue);
     } else {
-      // Remove leading zero for new numbers
-      calculationParts.shift();
+      // Remove leading zero for new numbers.
+      calculationSequence.shift();
     }
   }
 
-  let isCalculationEmpty = calculationParts.length === 0;
+  let isCalculationEmpty = calculationSequence.length === 0;
   // Decide whether to start a new calculation part or append to the current one.
   if (isInputOrLastPartAnOperator || isCalculationEmpty) {
     if (isLastPartAnOperator && isInputADecimal) {
-      // Add "0." after an operator if a decimal is pressed
-      calculationParts.push('0' + inputValue);
+      // Add "0." after an operator if a decimal is pressed.
+      calculationSequence.push('0' + inputValue);
     } else {
-      calculationParts.push(inputValue);
+      calculationSequence.push(inputValue);
     }
   } else {
-    // Prevent multiple decimals in one number
+    // Prevent multiple decimals in one number.
     if (lastPartContainsDecimal && isInputADecimal) return;
 
-    // Append to the existing number
-    calculationParts.splice(-1, 1, lastPart + inputValue);
+    let isToggled = isPartToggled(lastPartAsArray);
+    if (isToggled) {
+      // Add multiply operator before the input if the last part is toggled negative.
+      calculationSequence.push('x');
+
+      // Append zero before decimal if needed.
+      if (isInputADecimal) {
+        inputValue = '0' + inputValue;
+      }
+
+      calculationSequence.push(inputValue);
+    } else {
+      calculationSequence.splice(-1, 1, lastPart + inputValue);
+    }
   }
 }
 
-// Removes the last character or element from the calculation array
+// Removes the last character or element from the calculation array.
 function deleteLastInput() {
-  let lastPart = calculationParts.slice(-1).at(0);
-  let lastPartAsCharArray = lastPart.split('');
+  let lastPart = calculationSequence.slice(-1).at(0);
+  let lastPartAsArray = lastPart.split('');
 
   let isLastPartAnOperator = OPERATORS.includes(lastPart);
-  let isCalculationASinglePart = calculationParts.length === 1;
-  let isLastPartASingleChar = lastPartAsCharArray.length === 1;
+  let isCalculationASinglePart = calculationSequence.length === 1;
+  let isLastPartASingleChar = lastPartAsArray.length === 1;
 
-  // Reset to '0' if deleting the very last character on screen
+  // Reset to '0' if deleting the very last character on screen.
   if (isCalculationASinglePart && isLastPartASingleChar) {
     clearCalculation();
     return;
   }
 
   if (isLastPartAnOperator || isLastPartASingleChar) {
-    calculationParts.pop();
+    calculationSequence.pop();
   } else {
-    // Remove the last character from a multi-digit number
-    lastPartAsCharArray.pop();
-    calculationParts.splice(-1, 1, lastPartAsCharArray.join(''));
+    // Remove the last character from a multi-digit number.
+    lastPartAsArray.pop();
+    calculationSequence.splice(-1, 1, lastPartAsArray.join(''));
   }
 }
 
 function clearCalculation() {
-  calculationParts = ['0'];
+  calculationSequence = ['0'];
 }
 
 function updateDisplay() {
+  console.log(calculationSequence);
   calculationDisplay.textContent =
-    formatCalculationForDisplay(calculationParts);
+    formatCalculationForDisplay(calculationSequence);
 }
 
-// Converts the calculation array to a string for display
-function formatCalculationForDisplay(parts) {
-  return parts.join(' ');
+// Converts the calculation array to a string for display.
+function formatCalculationForDisplay(sequence) {
+  return sequence.join(' ');
 }
 
 // Event listeners
@@ -150,6 +215,7 @@ operatorButtons.forEach((button) => {
 });
 
 clearButton.addEventListener('click', handleClearClick);
+plusMinusToggleButton.addEventListener('click', handlePlusMinusToggleClick);
 equalsButton.addEventListener('click', handleEqualsClick);
 deleteButton.addEventListener('click', handleDeleteClick);
 decimalButton.addEventListener('click', handleDecimalClick);
