@@ -88,19 +88,19 @@ body {
 
 .btn-number,
 .btn-decimal,
-.btn-delete {
+.btn-backspace {
   background: #523D27;
 }
 
 .btn-number:hover,
 .btn-decimal:hover,
-.btn-delete:hover {
+.btn-backspace:hover {
   background: #6B4F35;
 }
 
 .btn-number:active,
 .btn-decimal:active,
-.btn-delete:active {
+.btn-backspace:active {
   background: #3F2F1F;
 }
 
