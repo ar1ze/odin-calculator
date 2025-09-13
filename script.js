@@ -1,273 +1,325 @@
-const DECIMAL_POINT = '.';
-const OPERATORS = ['+', '-', 'x', '/', '%'];
-const NEGATION_WRAPPER_CHARS = ['(', '-', ')'];
+const decimalPointCharacter = '.';
+const supportedOperators = ['+', '-', 'x', '/', '%'];
+// Defines the order of operations (PEMDAS/BODMAS).
+const operatorPrecedenceOrder = ['x', '/', '%', '+', '-'];
+// Using '(-...)' avoids ambiguity between a negative number and the subtraction operator.
+const negationWrapperCharacters = ['(', '-', ')'];
 
-// Stores the current calculation sequence of operands and operators.
-let calculationSequence = ['0'];
+// Holds the expression as an array of tokens, e.g., ['5', '+', '10'].
+let expressionTokens = ['0'];
 
-// DOM elements
 const numberButtons = document.querySelectorAll('.btn-number');
 const operatorButtons = document.querySelectorAll('.btn-operator');
-
 const clearButton = document.querySelector('.btn-clear');
-const plusMinusToggleButton = document.querySelector('.btn-plus-minus');
-
-const deleteButton = document.querySelector('.btn-delete');
+const toggleSignButton = document.querySelector('.btn-plus-minus');
+const backspaceButton = document.querySelector('.btn-backspace');
 const decimalButton = document.querySelector('.btn-decimal');
+const evaluateButton = document.querySelector('.btn-equals');
+const expressionDisplay = document.querySelector('.answer-display');
 
-const equalsButton = document.querySelector('.btn-equals');
-const calculationDisplay = document.querySelector('.answer-display');
-
-// Event handlers
-function handleNumberClick(event) {
+function handleNumberButtonClick(event) {
   const numberValue = event.target.textContent;
-  addToCalculation(numberValue);
+  processInput(numberValue);
   updateDisplay();
   console.log(`Number Button '${numberValue}' was clicked`);
 }
 
-function handleOperatorClick(event) {
+function handleOperatorButtonClick(event) {
   const operatorValue = event.target.textContent;
-  addToCalculation(operatorValue);
+  processInput(operatorValue);
   updateDisplay();
   console.log(`Operator button '${operatorValue}' was clicked`);
 }
 
-function handleClearClick() {
-  clearCalculation();
+function handleClearButtonClick() {
+  resetExpression();
   updateDisplay();
   console.log(`The button clear 'C' was clicked!`);
 }
 
-function handlePlusMinusToggleClick() {
-  togglePlusMinus();
+function handleToggleSignButtonClick() {
+  toggleLastOperandSign();
   updateDisplay();
   console.log(`The button plus minus '+/-' was clicked!`);
 }
 
-function handleDeleteClick() {
-  deleteLastInput();
+function handleBackspaceButtonClick() {
+  processBackspace();
   updateDisplay();
   console.log(`The button 'DEL' was clicked!`);
 }
 
-function handleDecimalClick(event) {
+function handleDecimalButtonClick(event) {
   const decimalValue = event.target.textContent;
-  addToCalculation(decimalValue);
+  processInput(decimalValue);
   updateDisplay();
   console.log(`The button decimal '.' was clicked!`);
 }
 
-function handleEqualsClick() {
-  computeCalculationSequence();
+function handleEvaluateButtonClick() {
+  evaluateExpression();
+  updateDisplay();
   console.log(`The button equals '=' was clicked!`);
 }
 
-function isPartNegated(partAsArray) {
-  let negationSymbolCount = partAsArray.reduce((sum, currentCharacter) => {
-    let isNegationSymbol = NEGATION_WRAPPER_CHARS.includes(currentCharacter);
-    if (isNegationSymbol) return ++sum;
-    else return sum;
+function isOperandWrappedAsNegative(operandCharacters) {
+  let hasLeadingMinusSign = operandCharacters.at(0) === '-';
+
+  let negationCharacterCount = operandCharacters.reduce((count, character) => {
+    let isNegationCharacter = negationWrapperCharacters.includes(character);
+    if (isNegationCharacter) return ++count;
+    else return count;
   }, 0);
-  return negationSymbolCount === 3;
+
+  // A negated operand is wrapped, e.g., '(-5)', which has 3 wrapper characters.
+  return negationCharacterCount === 3 || hasLeadingMinusSign;
 }
 
-function convertToPositivePart(partAsArray) {
-  return partAsArray.reduce((accumulatedString, currentCharacter) => {
-    let isNegationSymbol = NEGATION_WRAPPER_CHARS.includes(currentCharacter);
-    if (!isNegationSymbol) return accumulatedString + currentCharacter;
-    else return accumulatedString;
+// Extracts the number from a negated token, e.g., '(-5)' -> '5'.
+function unwrapNegatedOperand(negatedOperandCharacters) {
+  return negatedOperandCharacters.reduce((unwrappedOperand, character) => {
+    let isNegationCharacter = negationWrapperCharacters.includes(character);
+    if (!isNegationCharacter) return unwrappedOperand + character;
+    else return unwrappedOperand;
   }, '');
 }
 
-function convertToNegativePart(part) {
-  return '(-' + part + ')';
+// Wraps a number token to represent negation, e.g., '5' -> '(-5)'.
+function wrapOperandAsNegative(operandValue) {
+  return '(-' + operandValue + ')';
 }
 
-function togglePlusMinus() {
-  let isCalculationInitiallyZero = calculationSequence.at(0) === '0';
-  let lastElement = calculationSequence.slice(-1).at(0);
-  let isLastElementAnOperator = OPERATORS.includes(lastElement);
+function toggleLastOperandSign() {
+  let isExpressionDefaultZero = expressionTokens.at(0) === '0';
+  let lastToken = expressionTokens.slice(-1).at(0);
+  let isLastTokenAnOperator = supportedOperators.includes(lastToken);
 
-  // Do nothing if display is "0" or the last entry is an operator.
-  if (isCalculationInitiallyZero || isLastElementAnOperator) return;
+  // Prevent toggling the initial '0' or an operator.
+  if (isExpressionDefaultZero || isLastTokenAnOperator) return;
 
-  let lastElementAsArray = lastElement.split('');
-  let isCurrentlyNegated = isPartNegated(lastElementAsArray);
-  let toggledElement;
+  let lastOperandCharacters = lastToken.split('');
+  let isCurrentlyNegated = isOperandWrappedAsNegative(lastOperandCharacters);
+  let toggledOperand;
 
+  // Swap between the positive and negated form of the operand.
   if (isCurrentlyNegated) {
-    toggledElement = convertToPositivePart(lastElementAsArray);
+    toggledOperand = unwrapNegatedOperand(lastOperandCharacters);
   } else {
-    toggledElement = convertToNegativePart(lastElement);
+    toggledOperand = wrapOperandAsNegative(lastToken);
   }
 
-  calculationSequence.splice(-1, 1, toggledElement);
+  expressionTokens.splice(-1, 1, toggledOperand);
 }
 
-function insertNewElementToCalculation(inputValue) {
-  let lastElement = calculationSequence.slice(-1).at(0);
-  let isLastElementAnOperator = OPERATORS.includes(lastElement);
-  let isInputADecimal = inputValue === DECIMAL_POINT;
+function addNewTokenToExpression(token) {
+  let lastToken = expressionTokens.slice(-1).at(0);
+  let isLastTokenAnOperator = supportedOperators.includes(lastToken);
+  let isTokenADecimal = token === decimalPointCharacter;
 
-  // Initalize input to the operator input
-  let newValue = inputValue;
+  let newTokenValue = token;
 
-  // Add "0." after an operator if a decimal is pressed.
-  if (isLastElementAnOperator && isInputADecimal) {
-    newValue = '0' + inputValue;
+  // Prepend '0' for a more readable format if a decimal point follows an operator.
+  if (isLastTokenAnOperator && isTokenADecimal) {
+    newTokenValue = '0' + token;
   }
 
-  calculationSequence.push(newValue);
+  expressionTokens.push(newTokenValue);
 }
 
-function appendToLastElementInCalculation(inputValue) {
-  let isInputADecimal = inputValue === DECIMAL_POINT;
+function appendToLastTokenInExpression(character) {
+  let isCharacterADecimal = character === decimalPointCharacter;
 
-  let lastElement = calculationSequence.slice(-1).at(0);
-  let lastElementAsArray = lastElement.split('');
+  let lastOperand = expressionTokens.slice(-1).at(0);
+  let lastOperandCharacters = lastOperand.split('');
+  let hasLastOperandDecimal = lastOperand.includes(decimalPointCharacter);
 
-  let lastElementContainsDecimal = lastElement.includes(DECIMAL_POINT);
+  // Prevent multiple decimals in one operand.
+  if (hasLastOperandDecimal && isCharacterADecimal) return;
 
-  // Prevent multiple decimals in one number.
-  if (lastElementContainsDecimal && isInputADecimal) return;
+  let isLastOperandNegated = isOperandWrappedAsNegative(lastOperandCharacters);
+  if (isLastOperandNegated) {
+    // If the last token is negated, e.g., '(-5)', a new number implies
+    // multiplication, e.g., '(-5)' then '2' becomes '(-5) x 2'.
+    expressionTokens.push('x');
 
-  let isNegated = isPartNegated(lastElementAsArray);
-  if (isNegated) {
-    // Add multiply operator before the input if the last part is toggled negative.
-    calculationSequence.push('x');
-
-    // Append zero before decimal if needed.
-    if (isInputADecimal) {
-      inputValue = '0' + inputValue;
+    if (isCharacterADecimal) {
+      character = '0' + character;
     }
 
-    // Insert into the sequence
-    calculationSequence.push(inputValue);
+    expressionTokens.push(character);
   } else {
-    // Add to the multi digit
-    let updatedElement = lastElement + inputValue;
-    let isCalculationInitiallyZero = calculationSequence.at(0) === '0';
+    let updatedOperand = lastOperand + character;
+    let isExpressionDefaultZero = expressionTokens.at(0) === '0';
 
-    // If iniital value is zero just replace it
-    if (isCalculationInitiallyZero) {
-      updatedElement = inputValue;
+    // Overwrite the initial '0' instead of appending to it.
+    if (isExpressionDefaultZero && !isCharacterADecimal) {
+      updatedOperand = character;
     }
 
-    calculationSequence.splice(-1, 1, updatedElement);
+    expressionTokens.splice(-1, 1, updatedOperand);
   }
 }
 
-// Adds user input to the calculation sequence, handling complex logic.
-function addToCalculation(inputValue) {
-  let isCalculationEmpty = calculationSequence.length === 0;
+// This function acts as a router, deciding whether user input should
+// create a new token or be appended to the last one.
+function processInput(input) {
+  let isExpressionEmpty = expressionTokens.length === 0;
 
-  let isInputAnOperator = OPERATORS.includes(inputValue);
-  let isInputADecimal = inputValue === DECIMAL_POINT;
+  let isInputAnOperator = supportedOperators.includes(input);
+  let isInputADecimal = input === decimalPointCharacter;
 
-  let lastElement = calculationSequence.slice(-1).at(0);
-  let lastCharOfLastElement = lastElement.slice(-1);
+  let lastToken = expressionTokens.slice(-1).at(0);
+  let lastCharacterOfToken = lastToken.slice(-1);
 
-  let isLastElementAnOperator = OPERATORS.includes(lastElement);
-  let isLastCharOfLastElementADecimal = lastCharOfLastElement === DECIMAL_POINT;
-  let isInputOrLastElementAnOperator =
-    isInputAnOperator || isLastElementAnOperator;
+  let isLastTokenAnOperator = supportedOperators.includes(lastToken);
+  let isLastCharacterADecimal = lastCharacterOfToken === decimalPointCharacter;
+  let shouldStartNewToken = isInputAnOperator || isLastTokenAnOperator;
 
-  let areInputAndLastElementOperators =
-    isInputAnOperator && isLastElementAnOperator;
-  let areInputAndLastCharBothDecimals =
-    isInputADecimal && isLastCharOfLastElementADecimal;
+  let isRedundantOperator = isInputAnOperator && isLastTokenAnOperator;
+  let isRedundantDecimal = isInputADecimal && isLastCharacterADecimal;
 
-  // Prevent invalid inputs like consecutive operators or decimals.
-  if (areInputAndLastElementOperators || areInputAndLastCharBothDecimals)
-    return;
+  // Prevent invalid sequences like '5 + + 2' or '5..2'.
+  if (isRedundantOperator || isRedundantDecimal) return;
 
-  // Decide whether to start a new calculation part or append to the current one.
-  if (isInputOrLastElementAnOperator || isCalculationEmpty) {
-    insertNewElementToCalculation(inputValue);
+  // A new token is needed if the sequence is empty or the last input was an operator.
+  if (shouldStartNewToken || isExpressionEmpty) {
+    addNewTokenToExpression(input);
   } else {
-    appendToLastElementInCalculation(inputValue);
+    appendToLastTokenInExpression(input);
   }
 }
 
-// Removes the last character or element from the calculation array.
-function deleteLastInput() {
-  let lastElement = calculationSequence.slice(-1).at(0);
-  let lastElementAsArray = lastElement.split('');
+function processBackspace() {
+  let lastToken = expressionTokens.slice(-1).at(0);
+  let lastTokenCharacters = lastToken.split('');
 
-  let isLastElementAnOperator = OPERATORS.includes(lastElement);
-  let isSingleElementCalculation = calculationSequence.length === 1;
-  let isLastElementSingleChar = lastElementAsArray.length === 1;
+  let isLastTokenAnOperator = supportedOperators.includes(lastToken);
+  let isExpressionASingleToken = expressionTokens.length === 1;
+  let isLastTokenSingleCharacter = lastTokenCharacters.length === 1;
 
-  // Reset to '0' if deleting the very last character on screen.
-  if (isSingleElementCalculation && isLastElementSingleChar) {
-    clearCalculation();
+  // Reset to '0' if deleting the final character on screen.
+  if (isExpressionASingleToken && isLastTokenSingleCharacter) {
+    resetExpression();
     return;
   }
 
-  if (isLastElementAnOperator || isLastElementSingleChar) {
-    calculationSequence.pop();
+  // Operators or single-digit numbers are removed entirely.
+  if (isLastTokenAnOperator || isLastTokenSingleCharacter) {
+    expressionTokens.pop();
   } else {
-    // Remove the last character from a multi-digit number.
-    lastElementAsArray.pop();
-    calculationSequence.splice(-1, 1, lastElementAsArray.join(''));
+    // For a multi-character token, just remove its last character.
+    lastTokenCharacters.pop();
+    expressionTokens.splice(-1, 1, lastTokenCharacters.join(''));
   }
 }
 
-function computeCalculationSequence() {
-  let lastElement = calculationSequence.slice(-1).at(0);
+// Evaluates the expression by repeatedly finding the highest-precedence
+// operator and executing its operation until only the result remains.
+function evaluateExpression() {
+  expressionTokens = parseTokensForEvaluation(expressionTokens);
 
-  let calculationSequenceLength = calculationSequence.length;
-  let isLastElementAnOperator = OPERATORS.includes(lastElement);
+  let lastToken = expressionTokens.slice(-1).at(0);
+  let tokenCount = expressionTokens.length;
+  let isLastTokenAnOperator = supportedOperators.includes(lastToken);
 
-  // Return if single element or the last element is an operator
-  if (calculationSequenceLength || isLastElementAnOperator) return;
+  // An expression can't be evaluated if it's a single number or ends with an operator.
+  if (tokenCount === 1 || isLastTokenAnOperator) return;
+
+  // Reduce the expression by solving one operation at a time, respecting precedence.
+  do {
+    let operatorIndex = getHighestPrecedenceOperatorIndex(expressionTokens);
+    let leftOperandIndex = operatorIndex - 1;
+    let rightOperandIndex = operatorIndex + 1;
+
+    let leftOperand = expressionTokens[leftOperandIndex];
+    let rightOperand = expressionTokens[rightOperandIndex];
+    let operator = expressionTokens[operatorIndex];
+
+    let result = performOperation(leftOperand, rightOperand, operator);
+    // Handle division by zero or other invalid operations.
+    if (result === undefined) {
+      expressionTokens = [undefined];
+      break;
+    }
+
+    // Replace the processed chunk (e.g., [2, '+', 3]) with its result (e.g., [5]).
+    expressionTokens.splice(leftOperandIndex, 3, result);
+  } while (expressionTokens.length > 1);
+
+  // Convert the final result back to a string for display and further calculations.
+  expressionTokens[0] = String(expressionTokens[0]);
 }
 
-function convertCalculationSequenceToNumbers(array) {
-  return array.map((item) => {
-    // Return if item is an operator
-    let isOperator = OPERATORS.includes(item);
-    if (isOperator) return item;
+// Prepares the token sequence for evaluation by converting string numbers to actual numbers.
+function parseTokensForEvaluation(tokens) {
+  return tokens.map((token) => {
+    let isOperator = supportedOperators.includes(token);
+    if (isOperator) return token;
 
-    // Remove parantheses if toggled
-    let itemArray = item.split('');
-    let isToggled = isPartNegated(itemArray); 
-    item = isToggled ? item.slice(1, -1) : item
-    
-    // Convert to float or int depending on whether the number is a decimal
-    let isNumberDecimal = item.includes('.');
-    item = isNumberDecimal ? parseFloat(item) : parseInt(item);
+    // Unwrap negated numbers like '(-5)' into a processable '-5'.
+    let tokenCharacters = token.split('');
+    let isTokenNegated = isOperandWrappedAsNegative(tokenCharacters);
+    token = isTokenNegated ? token.slice(1, -1) : token;
 
-    return item;
+    let isTokenDecimal = token.includes('.');
+    return isTokenDecimal ? parseFloat(token) : parseInt(token);
   });
 }
 
-function clearCalculation() {
-  calculationSequence = ['0'];
+function filterOperatorsFromTokens(tokens) {
+  return tokens.filter((token) => supportedOperators.includes(token));
+}
+
+// Finds the index of the operator that should be evaluated next.
+function getHighestPrecedenceOperatorIndex(tokens) {
+  let operatorsInExpression = filterOperatorsFromTokens(tokens);
+  // Iterating through the precedence array ensures we find the operator
+  // with the highest priority first.
+  for (let operator of operatorPrecedenceOrder) {
+    let operatorIndex = operatorsInExpression.indexOf(operator);
+    if (operatorIndex !== -1) return tokens.indexOf(operator);
+  }
+}
+
+function performOperation(leftOperand, rightOperand, operator) {
+  switch (operator) {
+    case '+':
+      return leftOperand + rightOperand;
+    case '-':
+      return leftOperand - rightOperand;
+    case 'x':
+      return leftOperand * rightOperand;
+    case '/':
+      return leftOperand / rightOperand;
+    case '%':
+      return leftOperand % rightOperand;
+    default:
+      return undefined;
+  }
+}
+
+function resetExpression() {
+  expressionTokens = ['0'];
 }
 
 function updateDisplay() {
-  calculationDisplay.textContent =
-    formatCalculationForDisplay(calculationSequence);
+  expressionDisplay.textContent = formatTokensForDisplay(expressionTokens);
 }
 
-// Converts the calculation array to a string for display.
-function formatCalculationForDisplay(sequence) {
-  return sequence.join(' ');
+function formatTokensForDisplay(tokens) {
+  return tokens.join(' ');
 }
 
-// Event listeners
 numberButtons.forEach((button) => {
-  button.addEventListener('click', handleNumberClick);
+  button.addEventListener('click', handleNumberButtonClick);
 });
 
 operatorButtons.forEach((button) => {
-  button.addEventListener('click', handleOperatorClick);
+  button.addEventListener('click', handleOperatorButtonClick);
 });
 
-clearButton.addEventListener('click', handleClearClick);
-plusMinusToggleButton.addEventListener('click', handlePlusMinusToggleClick);
-equalsButton.addEventListener('click', handleEqualsClick);
-deleteButton.addEventListener('click', handleDeleteClick);
-decimalButton.addEventListener('click', handleDecimalClick);
+clearButton.addEventListener('click', handleClearButtonClick);
+toggleSignButton.addEventListener('click', handleToggleSignButtonClick);
+evaluateButton.addEventListener('click', handleEvaluateButtonClick);
+backspaceButton.addEventListener('click', handleBackspaceButtonClick);
+decimalButton.addEventListener('click', handleDecimalButtonClick);
