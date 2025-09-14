@@ -341,8 +341,6 @@ function createTextContentEvent(textContent) {
 
 function handleKeyPress(event) {
   let keyPressed = event.key;
-  console.log(`The key '${keyPressed}' was pressed`);
-  console.log(typeof keyPressed);
 
   let numberKeyPress = numberKeys.includes(keyPressed);
   let decimalKeyPress = decimalKeys.includes(keyPressed);
@@ -357,14 +355,12 @@ function handleKeyPress(event) {
     case numberKeyPress:
       textContentEvent = createTextContentEvent(keyPressed);
       handleNumberButtonClick(textContentEvent);
-      console.log(`Number Key Press: ${keyPressed}`);
       break;
 
     case operatorKeyPress:
       keyPressed = keyPressed === '*' ? 'x' : keyPressed;
       textContentEvent = createTextContentEvent(keyPressed);
       handleOperatorButtonClick(textContentEvent);
-      console.log(`Operator Key Press: ${keyPressed}`);
       break;
 
     case decimalKeyPress:
@@ -389,7 +385,7 @@ function handleKeyPress(event) {
       break;
 
     default:
-      console.log('Yet defined');
+      break;
   }
 }
 
