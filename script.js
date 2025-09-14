@@ -149,10 +149,10 @@ function appendToLastTokenInExpression(character) {
     expressionTokens.push(character);
   } else {
     let updatedOperand = lastOperand + character;
-    let isExpressionDefaultZero = expressionTokens.at(0) === '0';
+    let isLastOperandZero = lastOperand === '0';
 
     // Overwrite the initial '0' instead of appending to it.
-    if (isExpressionDefaultZero && !isCharacterADecimal) {
+    if (isLastOperandZero && !isCharacterADecimal) {
       updatedOperand = character;
     }
 
@@ -216,14 +216,14 @@ function processBackspace() {
 // Evaluates the expression by repeatedly finding the highest-precedence
 // operator and executing its operation until only the result remains.
 function evaluateExpression() {
-  expressionTokens = parseTokensForEvaluation(expressionTokens);
-
   let lastToken = expressionTokens.slice(-1).at(0);
   let tokenCount = expressionTokens.length;
   let isLastTokenAnOperator = supportedOperators.includes(lastToken);
 
   // An expression can't be evaluated if it's a single number or ends with an operator.
   if (tokenCount === 1 || isLastTokenAnOperator) return;
+
+  expressionTokens = parseTokensForEvaluation(expressionTokens);
 
   // Reduce the expression by solving one operation at a time, respecting precedence.
   do {
@@ -253,13 +253,19 @@ function evaluateExpression() {
 // Prepares the token sequence for evaluation by converting string numbers to actual numbers.
 function parseTokensForEvaluation(tokens) {
   return tokens.map((token) => {
-    let isOperator = supportedOperators.includes(token);
+    let isTokenIncludeOperator = supportedOperators.includes(token);
+    let isTokenSingleLength = token.length === 1;
+    let isOperator = isTokenIncludeOperator && isTokenSingleLength;
+
     if (isOperator) return token;
 
     // Unwrap negated numbers like '(-5)' into a processable '-5'.
     let tokenCharacters = token.split('');
     let isTokenNegated = isOperandWrappedAsNegative(tokenCharacters);
-    token = isTokenNegated ? token.slice(1, -1) : token;
+    let tokenContainParantheses = token.includes('(') && token.includes(')');
+    if (isTokenNegated && tokenContainParantheses) {
+      token = token.slice(1, -1);
+    }
 
     let isTokenDecimal = token.includes('.');
     return isTokenDecimal ? parseFloat(token) : parseInt(token);
