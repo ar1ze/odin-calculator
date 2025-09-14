@@ -249,6 +249,10 @@ function evaluateExpression() {
       break;
     }
 
+    if (result % 1 !== 0) {
+      result = result.toFixed(3);
+    }
+
     // Replace the processed chunk (e.g., [2, '+', 3]) with its result (e.g., [5]).
     expressionTokens.splice(leftOperandIndex, 3, result);
   } while (expressionTokens.length > 1);
@@ -342,7 +346,7 @@ function createTextContentEvent(textContent) {
 function handleKeyPress(event) {
   let keyPressed = event.key;
   console.log(`The key '${keyPressed}' was pressed`);
-  console.log(typeof(keyPressed));
+  console.log(typeof keyPressed);
 
   let numberKeyPress = numberKeys.includes(keyPressed);
   let decimalKeyPress = decimalKeys.includes(keyPressed);
