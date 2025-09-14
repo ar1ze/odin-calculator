@@ -300,7 +300,7 @@ function performOperation(leftOperand, rightOperand, operator) {
     case 'x':
       return leftOperand * rightOperand;
     case '/':
-      return leftOperand / rightOperand;
+      return rightOperand === 0 ? undefined : leftOperand / rightOperand;
     case '%':
       return leftOperand % rightOperand;
     default:
