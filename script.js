@@ -12,7 +12,7 @@ const clearKeys = ['c'];
 const toggleSignKeys = ['n'];
 const equalsKeys = ['=', 'Enter'];
 const backspaceKeys = ['Backspace'];
-const operatorKeys = ['+', '-', '/', '*'];
+const operatorKeys = ['+', '-', '/', '*', '%'];
 
 // Holds the expression as an array of tokens, e.g., ['5', '+', '10'].
 let expressionTokens = ['0'];
