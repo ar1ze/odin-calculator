@@ -246,7 +246,7 @@ function evaluateExpression() {
     }
 
     if (result % 1 !== 0) {
-      result = result.toFixed(3);
+      result = result.toFixed(2);
     }
 
     // Replace the processed chunk (e.g., [2, '+', 3]) with its result (e.g., [5]).
