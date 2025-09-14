@@ -134,22 +134,18 @@ function appendToLastTokenInExpression(character) {
   let isCharacterADecimal = character === decimalPointCharacter;
 
   let lastOperand = expressionTokens.slice(-1).at(0);
-  let lastOperandCharacters = lastOperand.split('');
   let hasLastOperandDecimal = lastOperand.includes(decimalPointCharacter);
 
   // Prevent multiple decimals in one operand.
   if (hasLastOperandDecimal && isCharacterADecimal) return;
 
-  let isLastOperandNegated = isOperandWrappedAsNegative(lastOperandCharacters);
-  if (isLastOperandNegated) {
+  let isLastOperandNegated =
+    lastOperand.startsWith('(') && lastOperand.endsWith(')');
+  if (isLastOperandNegated && isCharacterADecimal) {
     // If the last token is negated, e.g., '(-5)', a new number implies
     // multiplication, e.g., '(-5)' then '2' becomes '(-5) x 2'.
     expressionTokens.push('x');
-
-    if (isCharacterADecimal) {
-      character = '0' + character;
-    }
-
+    character = '0' + character;
     expressionTokens.push(character);
   } else {
     let updatedOperand = lastOperand + character;
