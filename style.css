@@ -17,6 +17,7 @@ body {
 }
 
 .calculator {
+  width: 34rem;
   border: 2px solid rgba(255, 255, 255, 0.1);
   background: #1A1C1E;
   border-radius: 1rem;
@@ -24,6 +25,7 @@ body {
 }
 
 .calculator-display {
+  overflow: hidden;
   padding: 2rem 0;
   border-bottom: 0.3rem solid #ECECEA;
   text-align: right;
@@ -40,6 +42,23 @@ body {
   height: 4rem;
   font-size: 4rem;
   color: #ECECEA;
+}
+
+.history-display,
+.answer-display {
+  box-sizing: content-box;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: right;
+  padding-bottom: 0.8rem;  
+}
+
+.history-display::-webkit-scrollbar,
+.answer-display::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+  background: transparent;
 }
 
 .calculator-buttons {

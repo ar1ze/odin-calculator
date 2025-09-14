@@ -59,8 +59,6 @@ function handleDecimalButtonClick(event) {
 }
 
 function handleEvaluateButtonClick() {
-  let history = expressionTokens.slice();
-  updateHistoryDisplay(history);
   evaluateExpression();
   updateAnswerDisplay();
   console.log(`The button equals '=' was clicked!`);
@@ -227,6 +225,9 @@ function evaluateExpression() {
   // An expression can't be evaluated if it's a single number or ends with an operator.
   if (tokenCount === 1 || isLastTokenAnOperator) return;
 
+  let history = expressionTokens.slice();
+  updateHistoryDisplay(history);
+
   expressionTokens = parseTokensForEvaluation(expressionTokens);
 
   // Reduce the expression by solving one operation at a time, respecting precedence.
@@ -319,10 +320,13 @@ function displayInitialHistoryExpression() {
 
 function updateAnswerDisplay() {
   expressionDisplay.textContent = formatTokensForDisplay(expressionTokens);
+  setTimeout(() => {
+    expressionDisplay.scrollLeft = expressionDisplay.scrollWidth;
+  }, 0);
 }
 
 function updateHistoryDisplay(history) {
-  historyDisplay.textContent = formatTokensForDisplay(history); 
+  historyDisplay.textContent = formatTokensForDisplay(history);
 }
 
 function formatTokensForDisplay(tokens) {
