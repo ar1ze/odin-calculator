@@ -5,6 +5,15 @@ const operatorPrecedenceOrder = ['x', '/', '%', '+', '-'];
 // Using '(-...)' avoids ambiguity between a negative number and the subtraction operator.
 const negationWrapperCharacters = ['(', '-', ')'];
 
+// Define key groups as constants
+const numberKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const decimalKeys = ['.', ','];
+const clearKeys = ['c'];
+const toggleSignKeys = ['n'];
+const equalsKeys = ['=', 'Enter'];
+const backspaceKeys = ['Backspace'];
+const operatorKeys = ['+', '-', '/', '*'];
+
 // Holds the expression as an array of tokens, e.g., ['5', '+', '10'].
 let expressionTokens = ['0'];
 
@@ -22,46 +31,39 @@ function handleNumberButtonClick(event) {
   const numberValue = event.target.textContent;
   processInput(numberValue);
   updateAnswerDisplay();
-  console.log(`Number Button '${numberValue}' was clicked`);
 }
 
 function handleOperatorButtonClick(event) {
   const operatorValue = event.target.textContent;
   processInput(operatorValue);
   updateAnswerDisplay();
-  console.log(`Operator button '${operatorValue}' was clicked`);
 }
 
 function handleClearButtonClick() {
   displayInitialHistoryExpression();
   resetTokenExpression();
   updateAnswerDisplay();
-  console.log(`The button clear 'C' was clicked!`);
 }
 
 function handleToggleSignButtonClick() {
   toggleLastOperandSign();
   updateAnswerDisplay();
-  console.log(`The button plus minus '+/-' was clicked!`);
 }
 
 function handleBackspaceButtonClick() {
   processBackspace();
   updateAnswerDisplay();
-  console.log(`The button 'DEL' was clicked!`);
 }
 
 function handleDecimalButtonClick(event) {
   const decimalValue = event.target.textContent;
   processInput(decimalValue);
   updateAnswerDisplay();
-  console.log(`The button decimal '.' was clicked!`);
 }
 
 function handleEvaluateButtonClick() {
   evaluateExpression();
   updateAnswerDisplay();
-  console.log(`The button equals '=' was clicked!`);
 }
 
 function isOperandWrappedAsNegative(operandCharacters) {
@@ -333,8 +335,67 @@ function formatTokensForDisplay(tokens) {
   return tokens.join(' ');
 }
 
+function createTextContentEvent(textContent) {
+  return { target: { textContent: textContent } };
+}
+
+function handleKeyPress(event) {
+  let keyPressed = event.key;
+  console.log(`The key '${keyPressed}' was pressed`);
+  console.log(typeof(keyPressed));
+
+  let numberKeyPress = numberKeys.includes(keyPressed);
+  let decimalKeyPress = decimalKeys.includes(keyPressed);
+  let clearKeyPress = clearKeys.includes(keyPressed);
+  let toggleSignKeyPress = toggleSignKeys.includes(keyPressed);
+  let equalsKeyPress = equalsKeys.includes(keyPressed);
+  let backspaceKeyPress = backspaceKeys.includes(keyPressed);
+  let operatorKeyPress = operatorKeys.includes(keyPressed);
+
+  let textContentEvent;
+  switch (true) {
+    case numberKeyPress:
+      textContentEvent = createTextContentEvent(keyPressed);
+      handleNumberButtonClick(textContentEvent);
+      console.log(`Number Key Press: ${keyPressed}`);
+      break;
+
+    case operatorKeyPress:
+      keyPressed = keyPressed === '*' ? 'x' : keyPressed;
+      textContentEvent = createTextContentEvent(keyPressed);
+      handleOperatorButtonClick(textContentEvent);
+      console.log(`Operator Key Press: ${keyPressed}`);
+      break;
+
+    case decimalKeyPress:
+      textContentEvent = createTextContentEvent(keyPressed);
+      handleDecimalButtonClick(textContentEvent);
+      break;
+
+    case backspaceKeyPress:
+      handleBackspaceButtonClick();
+      break;
+
+    case clearKeyPress:
+      handleClearButtonClick();
+      break;
+
+    case toggleSignKeyPress:
+      handleToggleSignButtonClick();
+      break;
+
+    case equalsKeyPress:
+      handleEvaluateButtonClick();
+      break;
+
+    default:
+      console.log('Yet defined');
+  }
+}
+
 numberButtons.forEach((button) => {
   button.addEventListener('click', handleNumberButtonClick);
+  button.addEventListener('keydown', handleNumberButtonClick);
 });
 
 operatorButtons.forEach((button) => {
@@ -346,3 +407,5 @@ toggleSignButton.addEventListener('click', handleToggleSignButtonClick);
 evaluateButton.addEventListener('click', handleEvaluateButtonClick);
 backspaceButton.addEventListener('click', handleBackspaceButtonClick);
 decimalButton.addEventListener('click', handleDecimalButtonClick);
+
+document.addEventListener('keydown', handleKeyPress);
