@@ -16,49 +16,53 @@ const backspaceButton = document.querySelector('.btn-backspace');
 const decimalButton = document.querySelector('.btn-decimal');
 const evaluateButton = document.querySelector('.btn-equals');
 const expressionDisplay = document.querySelector('.answer-display');
+const historyDisplay = document.querySelector('.history-display');
 
 function handleNumberButtonClick(event) {
   const numberValue = event.target.textContent;
   processInput(numberValue);
-  updateDisplay();
+  updateAnswerDisplay();
   console.log(`Number Button '${numberValue}' was clicked`);
 }
 
 function handleOperatorButtonClick(event) {
   const operatorValue = event.target.textContent;
   processInput(operatorValue);
-  updateDisplay();
+  updateAnswerDisplay();
   console.log(`Operator button '${operatorValue}' was clicked`);
 }
 
 function handleClearButtonClick() {
-  resetExpression();
-  updateDisplay();
+  displayInitialHistoryExpression();
+  resetTokenExpression();
+  updateAnswerDisplay();
   console.log(`The button clear 'C' was clicked!`);
 }
 
 function handleToggleSignButtonClick() {
   toggleLastOperandSign();
-  updateDisplay();
+  updateAnswerDisplay();
   console.log(`The button plus minus '+/-' was clicked!`);
 }
 
 function handleBackspaceButtonClick() {
   processBackspace();
-  updateDisplay();
+  updateAnswerDisplay();
   console.log(`The button 'DEL' was clicked!`);
 }
 
 function handleDecimalButtonClick(event) {
   const decimalValue = event.target.textContent;
   processInput(decimalValue);
-  updateDisplay();
+  updateAnswerDisplay();
   console.log(`The button decimal '.' was clicked!`);
 }
 
 function handleEvaluateButtonClick() {
+  let history = expressionTokens.slice();
+  updateHistoryDisplay(history);
   evaluateExpression();
-  updateDisplay();
+  updateAnswerDisplay();
   console.log(`The button equals '=' was clicked!`);
 }
 
@@ -199,7 +203,7 @@ function processBackspace() {
 
   // Reset to '0' if deleting the final character on screen.
   if (isExpressionASingleToken && isLastTokenSingleCharacter) {
-    resetExpression();
+    resetTokenExpression();
     return;
   }
 
@@ -304,12 +308,21 @@ function performOperation(leftOperand, rightOperand, operator) {
   }
 }
 
-function resetExpression() {
+function resetTokenExpression() {
   expressionTokens = ['0'];
 }
 
-function updateDisplay() {
+function displayInitialHistoryExpression() {
+  let historyTokens = [''];
+  updateHistoryDisplay(historyTokens);
+}
+
+function updateAnswerDisplay() {
   expressionDisplay.textContent = formatTokensForDisplay(expressionTokens);
+}
+
+function updateHistoryDisplay(history) {
+  historyDisplay.textContent = formatTokensForDisplay(history); 
 }
 
 function formatTokensForDisplay(tokens) {

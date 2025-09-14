@@ -31,11 +31,13 @@ body {
 }
 
 .history-display {
+  height: 2rem;
   font-size: 2rem;
   color: #8f9185;
 }
 
 .answer-display {
+  height: 4rem;
   font-size: 4rem;
   color: #ECECEA;
 }
