@@ -141,11 +141,15 @@ function appendToLastTokenInExpression(character) {
 
   let isLastOperandNegated =
     lastOperand.startsWith('(') && lastOperand.endsWith(')');
-  if (isLastOperandNegated && isCharacterADecimal) {
+  if (isLastOperandNegated) {
     // If the last token is negated, e.g., '(-5)', a new number implies
     // multiplication, e.g., '(-5)' then '2' becomes '(-5) x 2'.
     expressionTokens.push('x');
-    character = '0' + character;
+
+    if (isCharacterADecimal) {
+      character = '0' + character;
+    }
+
     expressionTokens.push(character);
   } else {
     let updatedOperand = lastOperand + character;
