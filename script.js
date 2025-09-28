@@ -31,16 +31,18 @@ function handleNumberButtonClick(event) {
   const numberValue = event.target.textContent;
   processInput(numberValue);
   updateAnswerDisplay();
+  displayEmptyHistoryExpression();
 }
 
 function handleOperatorButtonClick(event) {
   const operatorValue = event.target.textContent;
   processInput(operatorValue);
   updateAnswerDisplay();
+  displayEmptyHistoryExpression();
 }
 
 function handleClearButtonClick() {
-  displayInitialHistoryExpression();
+  displayEmptyHistoryExpression();
   resetTokenExpression();
   updateAnswerDisplay();
 }
@@ -48,17 +50,20 @@ function handleClearButtonClick() {
 function handleToggleSignButtonClick() {
   toggleLastOperandSign();
   updateAnswerDisplay();
+  displayEmptyHistoryExpression();
 }
 
 function handleBackspaceButtonClick() {
   processBackspace();
   updateAnswerDisplay();
+  displayEmptyHistoryExpression();
 }
 
 function handleDecimalButtonClick(event) {
   const decimalValue = event.target.textContent;
   processInput(decimalValue);
   updateAnswerDisplay();
+  displayEmptyHistoryExpression();
 }
 
 function handleEvaluateButtonClick() {
@@ -319,7 +324,7 @@ function resetTokenExpression() {
   expressionTokens = ['0'];
 }
 
-function displayInitialHistoryExpression() {
+function displayEmptyHistoryExpression() {
   let historyTokens = [''];
   updateHistoryDisplay(historyTokens);
 }
