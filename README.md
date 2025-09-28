@@ -7,7 +7,7 @@ A fully functional web calculator that performs basic arithmetic operations with
 </div>
 
 ## Live Demo
-🧮 [Try the Calculator](https://ar1ze.github.io/odin-calculator/)
+🧮 [Try the Calculator](https://ar1ze.github.io/calculator/)
 
 ## Key Technologies & Concepts
 • JavaScript  
